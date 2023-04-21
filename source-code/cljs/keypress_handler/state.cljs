@@ -7,6 +7,11 @@
 ; @ignore
 ;
 ; @atom (map)
+(def EXCLUSIVE-EVENTS (atom {}))
+
+; @ignore
+;
+; @atom (map)
 (def KEYPRESS-EVENTS (atom {}))
 
 ; @ignore
@@ -28,3 +33,13 @@
 ;
 ; @atom (boolean)
 (def TYPE-MODE? (atom false))
+
+; @ignore
+;
+; @atom (map)
+(def KEYDOWN-TIMEOUTS (atom {}))
+
+; @ignore
+;
+; @atom (map)
+(def KEYUP-TIMEOUTS (atom {}))

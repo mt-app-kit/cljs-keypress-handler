@@ -54,7 +54,7 @@
   ; @param (keyword) event-id
   ;
   ; @return (boolean)
-  [db [_ event-id]]
+  [event-id]
   ; Enable default if prevented by event and NOT prevented by other events ...
   (and      (keypress-prevented-by-event?        event-id)
        (not (keypress-prevented-by-other-events? event-id))))
@@ -102,7 +102,7 @@
   ;
   ; @description
   ; Returns the keyup events registered for the given key-code.
-  ; In type mode, only the {:required? true} events will be returned.
+  ; In type mode only the {:required? true} events will be returned.
   ;
   ; @param (integer) key-code
   ;

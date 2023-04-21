@@ -24,16 +24,22 @@ The <strong>cljs-keypress-handler</strong> functional documentation is [availabl
 
 You can track the changes of the <strong>cljs-keypress-handler</strong> library [here](CHANGES.md).
 
+# Usage
+
 ### Index
 
-- [How to register a keypress event?](#how-to-register-a-keypress-event)
-- [How to remove an keypress event?](#how-to-remove-a-keypress-event)
-- [How to get the currently pressed key list?](#how-to-get-the-currently-pressed-key-list)
-- [How to check whether a key pressed now?](#how-to-check-whether-a-key-pressed-now)
-- [How to enable type mode?](#how-to-enable-type-mode)
-- [How to disable type mode?](#how-to-disable-type-mode)
 
-# Usage
+- [How to register a keypress event?](#how-to-register-a-keypress-event)
+
+- [How to remove an keypress event?](#how-to-remove-a-keypress-event)
+
+- [How to get the currently pressed key list?](#how-to-get-the-currently-pressed-key-list)
+
+- [How to check whether a key pressed now?](#how-to-check-whether-a-key-pressed-now)
+
+- [How to enable type mode?](#how-to-enable-type-mode)
+
+- [How to disable type mode?](#how-to-disable-type-mode)
 
 ### How to register a keypress event?
 

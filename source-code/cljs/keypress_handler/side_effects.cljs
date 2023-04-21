@@ -3,8 +3,7 @@
     (:require [keypress-handler.env   :as env]
               [keypress-handler.state :as state]
               [random.api             :as random]
-              [vector.api             :as vector]
-              [window.api             :as window]))
+              [vector.api             :as vector]))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -74,8 +73,8 @@
   ; the events which use that key-code.
   ;
   ; XXX#1160
-  ; If a keypress event registered again, the cache doesn't stores its ID again
-  ; to avoid duplicates in the cache.
+  ; If a keypress event registered again, the cache doesn't store its ID again
+  ; (to avoid duplicates in the cache).
   ;
   ; @param (keyword) event-id
   ; @param (map) event-props
@@ -83,8 +82,8 @@
   ;  :on-keydown (metamorphic-event)(opt)
   ;  :on-keyup (metamorphic-event)(opt)}
   [event-id {:keys [key-code on-keydown on-keyup]}]
-  (cond-> state/EVENT-CACHE on-keydown (swap! update-in [key-code :keydown-events] vector/conj-item-once event-id)
-                            on-keyup   (swap! update-in [key-code :keyup-events]   vector/conj-item-once event-id)))
+  (if on-keydown (swap! state/EVENT-CACHE update-in [key-code :keydown-events] vector/conj-item-once event-id))
+  (if on-keyup   (swap! state/EVENT-CACHE update-in [key-code :keyup-events]   vector/conj-item-once event-id)))
 
 (defn uncache-event!
   ; @ignore
@@ -95,8 +94,8 @@
   ; @param (keyword) event-id
   [event-id]
   (let [key-code (get-in @state/KEYPRESS-EVENTS [event-id :key-code])]
-       (-> state/EVENT-CACHE (swap! update-in [key-code :keydown-events] vector/remove-item event-id)
-                             (swap! update-in [key-code :keyup-events]   vector/remove-item event-id))))
+       (swap! state/EVENT-CACHE update-in [key-code :keydown-events] vector/remove-item event-id)
+       (swap! state/EVENT-CACHE update-in [key-code :keyup-events]   vector/remove-item event-id)))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -107,21 +106,41 @@
   ; @param (keyword) event-id
   ; @param (map) event-props
   ; {}
-  [event-id {:keys [exclusive? key-code] :as event-props}])
-  ;(if exclusive? (-> state/ (update-in [:x.environment :keypress-handler/meta-items :exclusivity key-code] vector/conj-item event-id)
-  ;                      (dissoc-in [:x.environment :keypress-handler/meta-items :event-cache key-code])
-  ;               (return db)}])
+  [event-id {:keys [key-code] :as event-props}]
+  ; By storing the event ID in the EXCLUSIVE-EVENTS vector, later when the event
+  ; will be removed, the previous most exclusive event could be restored using the
+  ; EXCLUSIVE-EVENTS vector.
+  (swap! state/EXCLUSIVE-EVENTS update key-code vector/conj-item event-id)
+  ; Removing all the registered events from the cache with the same key-code
+  ; and the event will be the only one in the cache with this key-code.
+  (swap! state/EVENT-CACHE dissoc key-code))
 
 (defn unset-exclusivity!
   ; @ignore
   ;
   ; @param (keyword) event-id
-  [event-id])
-;  (let [key-code (get-in db [:x.environment :keypress-handler/keypress-events event-id :key-code])]
-;       (-> db (update-in [:x.environment :keypress-handler/meta-items :exclusivity key-code] vector/remove-item event-id))])
-              ;(as-> % (let [exclusivity (get-in db [:x.environment :keypress-handler/meta-items key-code])]
-              ;             (if (vector/nonempty? exclusivity)
-              ;                 (let [most-exclusive (last exclusivity)])))))
+  [event-id]
+  ; Most exclusive: last registered exclusive event with the same key-code.
+  ; Only exclusive: only registered exclusive event with the same key-code.
+  ; + The only exclusive is the most exclusive of course.
+  (let [key-code         (get-in @state/KEYPRESS-EVENTS [event-id :key-code])
+        exclusive-events (get @state/EXCLUSIVE-EVENTS key-code)
+        most-exclusive?  (vector/item-last? exclusive-events event-id)
+        only-exclusive?  (vector/only-item? exclusive-events event-id)]
+       (swap! state/EXCLUSIVE-EVENTS update key-code vector/remove-item event-id)
+       ; If the event was ...
+       ; ... the only exclusive with the same key-code the event cache
+       ;     will be restored.
+       ; ... the most but not only exclusive with the same key-code
+       ;     the second most exclusive will be the new most exclusive event.
+       ; ... not the only or most exclusive with the same key-code
+       ;     the cache will be unchanged.
+       (cond only-exclusive? (doseq [[event-id event-props] @state/KEYPRESS-EVENTS]
+                                    (if (= key-code (:key-code event-props))
+                                        (cache-event! event-id event-props)))
+             most-exclusive? (let [second-exclusive-id    (-> exclusive-events vector/remove-last-item vector/last-item)
+                                   second-exclusive-props (get @state/KEYPRESS-EVENTS second-exclusive-id)]
+                                  (cache-event! second-exclusive-id second-exclusive-props)))))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -147,8 +166,10 @@
   ; @param (keyword)(opt) event-id
   ; @param (map) event-props
   ; {:exclusive? (boolean)(opt)
-  ;   If true, the other (previously registered) keypress events with the same
+  ;   If true, other (previously registered) keypress events with the same
   ;   key-code will be ignored until the exclusive one removed.
+  ;   If more than one exclusive event registered with the same key-code, the
+  ;   last registered will be the exclusive.
   ;   Default: false
   ;  :key-code (integer)
   ;  :on-keydown (function)(opt)
@@ -170,10 +191,12 @@
   ([event-props]
    (reg-keypress-event! (random/generate-keyword) event-props))
 
-  ([event-id {:keys [key-code prevent-default?] :as event-props}]
+  ([event-id {:keys [exclusive? key-code prevent-default?] :as event-props}]
    (if prevent-default? (prevent-keypress-default! key-code))
-   (store-event-props! event-id event-props)
-   (cache-event!       event-id event-props)))
+   (if exclusive?       (set-exclusivity! event-id event-props))
+   (if-let [no-exclusive-set? (-> @state/EXCLUSIVE-EVENTS (get key-code) empty?)]
+           (cache-event! event-id event-props))
+   (store-event-props! event-id event-props)))
 
 (defn remove-keypress-event!
   ; @param (keyword) event-id
@@ -184,6 +207,8 @@
   (if (env/enable-default? event-id)
       (let [key-code (get-in @state/KEYPRESS-EVENTS [event-id :key-code])]
            (enable-keypress-default! key-code)))
+  (if-let [exclusive? (get-in @state/KEYPRESS-EVENTS [event-id :exclusive?])]
+          (unset-exclusivity! event-id))
   (uncache-event!      event-id)
   (remove-event-props! event-id))
 
@@ -196,7 +221,7 @@
   ; @param (integer) key-code
   [key-code]
   (mark-key-as-pressed! key-code)
-  (doseq [on-keydown (env/get-on-keydown-events key-code)]
+  (doseq [on-keydown (env/get-keydown-events key-code)]
          (on-keydown)))
 
 (defn key-released
@@ -207,5 +232,5 @@
   ; BUG#5050
   ; https://stackoverflow.com/questions/25438608/javascript-keyup-isnt-called-when-command-and-another-is-pressed
   (unmark-key-as-pressed! key-code)
-  (doseq [on-keyup (env/get-on-keyup-events key-code)]
+  (doseq [on-keyup (env/get-keyup-events key-code)]
          (on-keyup)))
