@@ -41,6 +41,8 @@ You can track the changes of the <strong>cljs-keypress-handler</strong> library 
 
 - [How to disable type mode?](#how-to-disable-type-mode)
 
+- [How to provide exclusivity for a keypress event over other keypress events?](#how-to-provide-exclusivity-for-a-keypress-event-over-other-keypress-events)
+
 ### How to register a keypress event?
 
 The [`keypress-handler.api/reg-keypress-event!`](documentation/cljs/keypress-handler/API.md#reg-keypress-event)
@@ -78,7 +80,7 @@ function returns the currently pressed keys' codes in a vector.
 ```
 (get-pressed-keys)
 
-; E.g. Returns 13 and 65 if you both press the ENTER and A key.
+; E.g. Returns 13 and 65 if you are both pressing the ENTER and A key.
 ; (get-pressed-keys)
 ; =>
 ; [13 65]
@@ -120,4 +122,22 @@ function disables the type mode and all the registered events could be fired.
 
 ```
 (quit-type-mode!)
+```
+
+### How to provide exclusivity for a keypress event over other keypress events?
+
+Passing the `{:exclusive? true}` setting to a keypress event means that other keypress
+events with the same key-code will be ignored until the exclusive one registered.
+If more than one event (with the same key-code) got the `{:exclusive? true}` setting,
+the last registered will be the exclusive one.
+
+```
+; This event won't be fired until at least one exclusive event registered with the same key-code.
+(reg-keypress-event! {:key-code  13
+                      :on-keyup  (fn [key-code] ...)})
+
+; This event will be fired only when the ENTER (13) key pressed.
+(reg-keypress-event! {:key-code   13
+                      :on-keyup   (fn [key-code] ...)
+                      :exclusive? true})
 ```

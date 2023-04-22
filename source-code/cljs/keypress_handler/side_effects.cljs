@@ -169,7 +169,7 @@
   ;   If true, other (previously registered) keypress events with the same
   ;   key-code will be ignored until the exclusive one removed.
   ;   If more than one exclusive event registered with the same key-code, the
-  ;   last registered will be the exclusive.
+  ;   last registered will be the exclusive one.
   ;   Default: false
   ;  :key-code (integer)
   ;  :on-keydown (function)(opt)
