@@ -195,7 +195,8 @@
    (if prevent-default? (prevent-keypress-default! key-code))
    (if exclusive?       (set-exclusivity! event-id event-props))
    (if-let [no-exclusive-set? (-> @state/EXCLUSIVE-EVENTS (get key-code) empty?)]
-           (cache-event! event-id event-props))
+           (cache-event! event-id event-props)
+           (if exclusive? (cache-event! event-id event-props)))
    (store-event-props! event-id event-props)))
 
 (defn remove-keypress-event!
