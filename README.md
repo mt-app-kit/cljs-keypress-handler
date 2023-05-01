@@ -28,7 +28,6 @@ You can track the changes of the <strong>cljs-keypress-handler</strong> library 
 
 ### Index
 
-
 - [How to register a keypress event?](#how-to-register-a-keypress-event)
 
 - [How to remove an keypress event?](#how-to-remove-a-keypress-event)
