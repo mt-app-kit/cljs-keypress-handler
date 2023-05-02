@@ -79,7 +79,7 @@ function returns the currently pressed keys' codes in a vector.
 ```
 (get-pressed-keys)
 
-; E.g. Returns 13 and 65 if you are both pressing the ENTER and A key.
+; E.g. Returns 13 and 65 if you are both pressing the ENTER and the A key.
 ; (get-pressed-keys)
 ; =>
 ; [13 65]
@@ -97,14 +97,14 @@ function returns TRUE if the given key-code is currently pressed.
 ### How to enable type mode?
 
 The [`keypress-handler.api/set-type-mode!`](documentation/cljs/keypress-handler/API.md#set-type-mode)
-function enables the type mode and only those events will fired that get the {:required? true} setting.
+function enables the type mode and only those events will be fired which got the {:required? true} setting.
 
 ```
 (set-type-mode!)
 ```
 
 ```
-; This event won't be fired until the type mode is on.
+; This event won't be fired while the type mode is on.
 (reg-keypress-event! {:key-code  13
                       :on-keyup  (fn [key-code] ...)})
 
@@ -126,12 +126,12 @@ function disables the type mode and all the registered events could be fired.
 ### How to provide exclusivity for a keypress event over other keypress events?
 
 Passing the `{:exclusive? true}` setting to a keypress event means that other keypress
-events with the same key-code will be ignored until the exclusive one registered.
+events with the same key-code will be ignored while the exclusive one registered.
 If more than one event (with the same key-code) got the `{:exclusive? true}` setting,
 the last registered will be the exclusive one.
 
 ```
-; This event won't be fired until at least one exclusive event registered with the same key-code.
+; This event won't be fired while at least one exclusive event registered with the same key-code.
 (reg-keypress-event! {:key-code  13
                       :on-keyup  (fn [key-code] ...)})
 
