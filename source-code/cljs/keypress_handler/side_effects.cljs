@@ -79,8 +79,8 @@
   ; @param (keyword) event-id
   ; @param (map) event-props
   ; {:key-code (integer)
-  ;  :on-keydown (metamorphic-event)(opt)
-  ;  :on-keyup (metamorphic-event)(opt)}
+  ;  :on-keydown (function)(opt)
+  ;  :on-keyup (function)(opt)}
   [event-id {:keys [key-code on-keydown on-keyup]}]
   (if on-keydown (swap! state/EVENT-CACHE update-in [key-code :keydown-events] vector/conj-item-once event-id))
   (if on-keyup   (swap! state/EVENT-CACHE update-in [key-code :keyup-events]   vector/conj-item-once event-id)))
