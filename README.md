@@ -79,7 +79,7 @@ function returns the currently pressed keys' codes in a vector.
 ```
 (get-pressed-keys)
 
-; E.g. Returns 13 and 65 if you are both pressing the ENTER and the A key.
+; For example it returns 13 and 65 if you are both pressing the ENTER and the A key.
 ; (get-pressed-keys)
 ; =>
 ; [13 65]
