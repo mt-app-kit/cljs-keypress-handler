@@ -86,14 +86,15 @@
   ; @ignore
   ;
   ; @description
-  ; Returns the keydown events registered for the given key-code.
-  ; In type mode, only the {:required? true} events will be returned.
+  ; - Returns the keydown events registered for the given key code.
+  ; - In type mode, only the {:required? true} events will be returned.
   ;
   ; @param (integer) key-code
   ;
   ; @return (functions in vector)
   [key-code]
-  (letfn [(f [keydown-events event-id] (conj keydown-events (get-keydown-event event-id)))]
+  (letfn [(f [keydown-events event-id] (if-let [keydown-event (get-keydown-event event-id)] ; <- The 'get-keydown-event' function could return NIL in type mode
+                                               (conj keydown-events keydown-event) keydown-events))]
          (let [event-ids (get-in @state/EVENT-CACHE [key-code :keydown-events])]
               (reduce f [] event-ids))))
 
@@ -101,13 +102,14 @@
   ; @ignore
   ;
   ; @description
-  ; Returns the keyup events registered for the given key-code.
-  ; In type mode only the {:required? true} events will be returned.
+  ; - Returns the keyup events registered for the given key code.
+  ; - In type mode only the {:required? true} events will be returned.
   ;
   ; @param (integer) key-code
   ;
   ; @return (functions in vector)
   [key-code]
-  (letfn [(f [keyup-events event-id] (conj keyup-events (get-keyup-event event-id)))]
+  (letfn [(f [keyup-events event-id] (if-let [keyup-event (get-keyup-event event-id)] ; <- The 'get-keyup-event' function could return NIL in type mode
+                                             (conj keyup-events keyup-event) keyup-events))]
          (let [event-ids (get-in @state/EVENT-CACHE [key-code :keyup-events])]
               (reduce f [] event-ids))))

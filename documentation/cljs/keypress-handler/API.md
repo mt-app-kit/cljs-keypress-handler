@@ -1,5 +1,9 @@
 
-# keypress-handler.api ClojureScript namespace
+### keypress-handler.api
+
+Functional documentation of the keypress-handler.api ClojureScript namespace
+
+---
 
 ##### [README](../../../README.md) > [DOCUMENTATION](../../COVER.md) > keypress-handler.api
 
@@ -16,6 +20,8 @@
 - [remove-keypress-event!](#remove-keypress-event)
 
 - [set-type-mode!](#set-type-mode)
+
+---
 
 ### get-pressed-keys
 
@@ -268,5 +274,5 @@
 
 ---
 
-This documentation is generated with the [clj-docs-generator](https://github.com/bithandshake/clj-docs-generator) engine.
+<sub>This documentation is generated with the [clj-docs-generator](https://github.com/bithandshake/clj-docs-generator) engine.</sub>
 
