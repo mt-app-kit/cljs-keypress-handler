@@ -44,9 +44,9 @@
   [event-id]
   (let [key-code     (get-in @state/KEYPRESS-EVENTS [event-id :key-code])
         other-events (dissoc @state/KEYPRESS-EVENTS  event-id)]
-       (letfn [(f [[_ event-props]] (and (:prevent-default? event-props)
-                                         (= key-code (:key-code event-props))))]
-              (some f other-events))))
+       (letfn [(f0 [[_ event-props]] (and (:prevent-default? event-props)
+                                          (= key-code (:key-code event-props))))]
+              (some f0 other-events))))
 
 (defn enable-default?
   ; @ignore
@@ -93,10 +93,10 @@
   ;
   ; @return (functions in vector)
   [key-code]
-  (letfn [(f [keydown-events event-id] (if-let [keydown-event (get-keydown-event event-id)] ; <- The 'get-keydown-event' function could return NIL in type mode
-                                               (conj keydown-events keydown-event) keydown-events))]
+  (letfn [(f0 [keydown-events event-id] (if-let [keydown-event (get-keydown-event event-id)] ; <- The 'get-keydown-event' function could return NIL in type mode
+                                                (conj keydown-events keydown-event) keydown-events))]
          (let [event-ids (get-in @state/EVENT-CACHE [key-code :keydown-events])]
-              (reduce f [] event-ids))))
+              (reduce f0 [] event-ids))))
 
 (defn get-keyup-events
   ; @ignore
@@ -109,7 +109,7 @@
   ;
   ; @return (functions in vector)
   [key-code]
-  (letfn [(f [keyup-events event-id] (if-let [keyup-event (get-keyup-event event-id)] ; <- The 'get-keyup-event' function could return NIL in type mode
-                                             (conj keyup-events keyup-event) keyup-events))]
+  (letfn [(f0 [keyup-events event-id] (if-let [keyup-event (get-keyup-event event-id)] ; <- The 'get-keyup-event' function could return NIL in type mode
+                                              (conj keyup-events keyup-event) keyup-events))]
          (let [event-ids (get-in @state/EVENT-CACHE [key-code :keyup-events])]
-              (reduce f [] event-ids))))
+              (reduce f0 [] event-ids))))
