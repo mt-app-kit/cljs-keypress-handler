@@ -1,9 +1,9 @@
 
 (ns keypress-handler.side-effects
-    (:require [keypress-handler.env   :as env]
-              [keypress-handler.state :as state]
-              [random.api             :as random]
-              [vector.api             :as vector]))
+    (:require [fruits.random.api      :as random]
+              [fruits.vector.api      :as vector]
+              [keypress-handler.env   :as env]
+              [keypress-handler.state :as state]))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
