@@ -18,7 +18,7 @@ Check out the latest commit on the [release branch](https://github.com/bithandsh
 
 ### Documentation
 
-The <strong>cljs-keypress-handler</strong> functional documentation is [available here](documentation/COVER.md).
+The <strong>cljs-keypress-handler</strong> functional documentation is [available here](https://bithandshake.github.io/cljs-keypress-handler).
 
 ### Changelog
 
