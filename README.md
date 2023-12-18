@@ -9,7 +9,7 @@ The <strong>cljs-keypress-handler</strong> is a simple ClojureScript library for
 
 ```
 {:deps {bithandshake/cljs-keypress-handler {:git/url "https://github.com/bithandshake/cljs-keypress-handler"
-                                            :sha     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}}
+                                            :sha     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}}}
 ```
 
 ### Current version
