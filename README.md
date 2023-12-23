@@ -3,7 +3,7 @@
 
 ### Overview
 
-The <strong>cljs-keypress-handler</strong> is a simple ClojureScript library for using keypress events.
+The <strong>cljs-keypress-handler</strong> is a simple keypress event handler for Clojure projects.
 
 ### deps.edn
 
