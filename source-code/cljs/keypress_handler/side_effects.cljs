@@ -198,11 +198,11 @@
            (if exclusive? (cache-event! event-id event-props)))
    (store-event-props! event-id event-props)))
 
-(defn remove-keypress-event!
+(defn dereg-keypress-event!
   ; @param (keyword) event-id
   ;
   ; @usage
-  ; (remove-keypress-event! :my-event)
+  ; (dereg-keypress-event! :my-event)
   [event-id]
   (if (env/enable-default? event-id)
       (let [key-code (get-in @state/KEYPRESS-EVENTS [event-id :key-code])]
