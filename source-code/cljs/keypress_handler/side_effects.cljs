@@ -125,7 +125,7 @@
   (let [key-code         (get-in @state/KEYPRESS-EVENTS [event-id :key-code])
         exclusive-events (get @state/EXCLUSIVE-EVENTS key-code)
         most-exclusive?  (vector/item-last? exclusive-events event-id)
-        only-exclusive?  (vector/only-item? exclusive-events event-id)]
+        only-exclusive?  (vector/item-only? exclusive-events event-id)]
        (swap! state/EXCLUSIVE-EVENTS update key-code vector/remove-item event-id)
        ; If the event was ...
        ; ... the only exclusive with the same key-code the event cache
