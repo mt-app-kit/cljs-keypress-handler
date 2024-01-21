@@ -49,7 +49,7 @@
   ; @param (keyword) event-id
   ; @param (map) event-props
   [event-id event-props]
-  ; @NOTE (#1160)
+  ; @note (#1160)
   (swap! state/KEYPRESS-EVENTS assoc event-id event-props))
 
 (defn remove-event-props!
@@ -75,14 +75,14 @@
   ; @param (keyword) event-id
   ; @param (map) event-props
   ; {:key-code (integer)
-  ;  :on-keydown (function)(opt)
-  ;  :on-keyup (function)(opt)}
-  [event-id {:keys [key-code on-keydown on-keyup]}]
-  ; @NOTE (#1160)
+  ;  :on-keydown-f (function)(opt)
+  ;  :on-keyup-f (function)(opt)}
+  [event-id {:keys [key-code on-keydown-f on-keyup-f]}]
+  ; @note (#1160)
   ; If a keypress event registered again, the cache doesn't store its ID again
   ; (to avoid duplicates in the cache).
-  (if on-keydown (swap! state/EVENT-CACHE update-in [key-code :keydown-events] vector/conj-item-once event-id))
-  (if on-keyup   (swap! state/EVENT-CACHE update-in [key-code :keyup-events]   vector/conj-item-once event-id)))
+  (if on-keydown-f (swap! state/EVENT-CACHE update-in [key-code :keydown-events] vector/conj-item-once event-id))
+  (if on-keyup-f   (swap! state/EVENT-CACHE update-in [key-code :keyup-events]   vector/conj-item-once event-id)))
 
 (defn uncache-event!
   ; @ignore
@@ -171,8 +171,8 @@
   ;   last registered will be the exclusive one.
   ;   Default: false
   ;  :key-code (integer)
-  ;  :on-keydown (function)(opt)
-  ;  :on-keyup (function)(opt)
+  ;  :on-keydown-f (function)(opt)
+  ;  :on-keyup-f (function)(opt)
   ;  :prevent-default? (boolean)(opt)
   ;   Default: false
   ;  :required? (boolean)(opt)
@@ -186,7 +186,7 @@
   ; (reg-keypress-event! :my-keypress-event {...})
   ;
   ; @usage
-  ; (reg-keypress-event! {:key-code 65 :on-keydown (fn [key-code] ...)})
+  ; (reg-keypress-event! {:key-code 65 :on-keydown-f (fn [key-code] ...)})
   ([event-props]
    (reg-keypress-event! (random/generate-keyword) event-props))
 
@@ -221,16 +221,16 @@
   ; @param (integer) key-code
   [key-code]
   (mark-key-as-pressed! key-code)
-  (doseq [on-keydown (env/get-keydown-events key-code)]
-         (on-keydown)))
+  (doseq [on-keydown-f (env/get-keydown-events key-code)]
+         (on-keydown-f)))
 
 (defn key-released
   ; @ignore
   ;
   ; @param (integer) key-code
   [key-code]
-  ; @BUG (#5050)
+  ; @bug (#5050)
   ; https://stackoverflow.com/questions/25438608/javascript-keyup-isnt-called-when-command-and-another-is-pressed
   (unmark-key-as-pressed! key-code)
-  (doseq [on-keyup (env/get-keyup-events key-code)]
-         (on-keyup)))
+  (doseq [on-keyup-f (env/get-keyup-events key-code)]
+         (on-keyup-f)))

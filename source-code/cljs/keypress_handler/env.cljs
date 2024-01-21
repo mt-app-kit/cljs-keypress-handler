@@ -69,8 +69,8 @@
   ;
   ; @return (function)
   [event-id]
-  (let [{:keys [on-keydown required?]} (event-id @state/KEYPRESS-EVENTS)]
-       (cond required? on-keydown (not @state/TYPE-MODE?) on-keydown)))
+  (let [{:keys [on-keydown-f required?]} (event-id @state/KEYPRESS-EVENTS)]
+       (cond required? on-keydown-f (not @state/TYPE-MODE?) on-keydown-f)))
 
 (defn get-keyup-event
   ; @ignore
@@ -79,8 +79,8 @@
   ;
   ; @return (function)
   [event-id]
-  (let [{:keys [on-keyup required?]} (event-id @state/KEYPRESS-EVENTS)]
-       (cond required? on-keyup (not @state/TYPE-MODE?) on-keyup)))
+  (let [{:keys [on-keyup-f required?]} (event-id @state/KEYPRESS-EVENTS)]
+       (cond required? on-keyup-f (not @state/TYPE-MODE?) on-keyup-f)))
 
 (defn get-keydown-events
   ; @ignore
