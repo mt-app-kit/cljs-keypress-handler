@@ -100,7 +100,7 @@ function returns TRUE if the given key-code is currently pressed.
 ### How to enable type mode?
 
 The [`keypress-handler.api/set-type-mode!`](documentation/cljs/keypress-handler/API.md#set-type-mode)
-function enables the type mode and only those events will be fired which got the {:required? true} setting.
+function enables the type mode and only those events will be fired which got the {:in-type-mode? true} setting.
 
 ```
 (set-type-mode!)
@@ -114,7 +114,7 @@ function enables the type mode and only those events will be fired which got the
 ; This event will be fired even if the type mode is on.                      
 (reg-keypress-event! {:key-code  13
                       :on-keyup  (fn [key-code] ...)
-                      :required? true})
+                      :in-type-mode? true})
 ```
 
 ### How to disable type mode?

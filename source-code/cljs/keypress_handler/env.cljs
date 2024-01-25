@@ -69,8 +69,8 @@
   ;
   ; @return (function)
   [event-id]
-  (let [{:keys [on-keydown-f required?]} (event-id @state/KEYPRESS-EVENTS)]
-       (cond required? on-keydown-f (not @state/TYPE-MODE?) on-keydown-f)))
+  (let [{:keys [in-type-mode? on-keydown-f]} (event-id @state/KEYPRESS-EVENTS)]
+       (cond in-type-mode? on-keydown-f (not @state/TYPE-MODE?) on-keydown-f)))
 
 (defn get-keyup-event
   ; @ignore
@@ -79,15 +79,15 @@
   ;
   ; @return (function)
   [event-id]
-  (let [{:keys [on-keyup-f required?]} (event-id @state/KEYPRESS-EVENTS)]
-       (cond required? on-keyup-f (not @state/TYPE-MODE?) on-keyup-f)))
+  (let [{:keys [in-type-mode? on-keyup-f]} (event-id @state/KEYPRESS-EVENTS)]
+       (cond in-type-mode? on-keyup-f (not @state/TYPE-MODE?) on-keyup-f)))
 
 (defn get-keydown-events
   ; @ignore
   ;
   ; @description
   ; - Returns the keydown events registered for the given key code.
-  ; - In type mode, only the {:required? true} events will be returned.
+  ; - In type mode, only the {:in-type-mode? true} events will be returned.
   ;
   ; @param (integer) key-code
   ;
@@ -103,7 +103,7 @@
   ;
   ; @description
   ; - Returns the keyup events registered for the given key code.
-  ; - In type mode only the {:required? true} events will be returned.
+  ; - In type mode only the {:in-type-mode? true} events will be returned.
   ;
   ; @param (integer) key-code
   ;

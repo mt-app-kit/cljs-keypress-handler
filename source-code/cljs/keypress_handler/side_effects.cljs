@@ -165,18 +165,18 @@
   ; @param (keyword)(opt) event-id
   ; @param (map) event-props
   ; {:exclusive? (boolean)(opt)
-  ;   If true, other (previously registered) keypress events with the same
-  ;   key-code will be ignored until the exclusive one removed.
-  ;   If more than one exclusive event registered with the same key-code, the
-  ;   last registered will be the exclusive one.
+  ;   If TRUE, other (previously registered) keypress events with the same
+  ;   key-code will be ignored, until the exclusive one is removed.
+  ;   If more than one exclusive event is registered with the same key-code,
+  ;   the last registered will always be the exclusive one.
   ;   Default: false
   ;  :key-code (integer)
+  ;  :in-type-mode? (boolean)(opt)
+  ;   If TRUE, the event won't be ignored when the type mode is on.
+  ;   Default: false
   ;  :on-keydown-f (function)(opt)
   ;  :on-keyup-f (function)(opt)
   ;  :prevent-default? (boolean)(opt)
-  ;   Default: false
-  ;  :required? (boolean)(opt)
-  ;   If true, the event won't be ignored when the type mode is on.
   ;   Default: false}
   ;
   ; @usage
