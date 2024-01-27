@@ -8,32 +8,129 @@
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
 
-(defn set-type-mode!
+(defn enable-type-mode!
+  ; @note
+  ; Keypress events that are registered without the '{:in-type-mode? true}' setting
+  ; are ignored while the type mode is enabled.
+  ;
+  ; @description
+  ; Enables the type mode of the keypress handler.
+  ;
   ; @usage
-  ; (set-type-mode!)
+  ; (enable-type-mode!)
   []
   (reset! state/TYPE-MODE? true))
 
-(defn quit-type-mode!
+(defn disable-type-mode!
+  ; @note
+  ; Keypress events that are registered without the '{:in-type-mode? true}' setting
+  ; are ignored while the type mode is enabled.
+  ;
+  ; @description
+  ; Disables the type mode of the keypress handler.
+  ;
   ; @usage
-  ; (quit-type-mode!)
+  ; (disable-type-mode!)
   []
   (reset! state/TYPE-MODE? false))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
 
+(defn mark-key-as-pressed!
+  ; @ignore
+  ;
+  ; @description
+  ; Stores the given key code in the 'PRESSED-KEYS' atom.
+  ;
+  ; @param (integer) key-code
+  ;
+  ; @usage
+  ; (mark-key-as-pressed! 27)
+  [key-code]
+  (swap! state/PRESSED-KEYS assoc key-code true))
+
+(defn unmark-key-as-pressed!
+  ; @ignore
+  ;
+  ; @description
+  ; Removes the given key code from the 'PRESSED-KEYS' atom.
+  ;
+  ; @param (integer) key-code
+  ;
+  ; @usage
+  ; (unmark-key-as-pressed! 27)
+  [key-code]
+  (swap! state/PRESSED-KEYS dissoc key-code))
+
+;; ----------------------------------------------------------------------------
+;; ----------------------------------------------------------------------------
+
+(defn key-pressed
+  ; @ignore
+  ;
+  ; @description
+  ; - Stores the given key code in the 'PRESSED-KEYS' atom.
+  ; - Calls the 'on-keydown-f' functions of registered keypress events associated with the given key code.
+  ; - If the keypress handler is in type mode, calls the 'on-keydown-f' functions only of keypress events
+  ;   registered with the '{:in-type-mode? true}' setting.
+  ; - Doesn't call the 'on-keydown-f' function of keypress events that are currently removed from the event
+  ;   cache due to the exclusivity of another keypress event.
+  ;
+  ; @param (integer) key-code
+  ;
+  ; @usage
+  ; (key-pressed 27)
+  [key-code]
+  (mark-key-as-pressed! key-code)
+  (doseq [on-keydown-f (env/get-events-on-keydown-f key-code)]
+         (on-keydown-f key-code)))
+
+(defn key-released
+  ; @ignore
+  ;
+  ; @description
+  ; - Removes the given key code from the 'PRESSED-KEYS' atom.
+  ; - Calls the 'on-keyup-f' functions of registered keypress events associated with the given key code.
+  ; - If the keypress handler is in type mode, calls the 'on-keyup-f' functions only of keypress events
+  ;   registered with the '{:in-type-mode? true}' setting.
+  ; - Doesn't call the 'on-keyup-f' function of keypress events that are currently removed from the event
+  ;   cache due to the exclusivity of another keypress event.
+  ;
+  ; @param (integer) key-code
+  ;
+  ; @usage
+  ; (key-released 27)
+  [key-code]
+  ; @bug (#5050)
+  ; https://stackoverflow.com/questions/25438608/javascript-keyup-isnt-called-when-command-and-another-is-pressed
+  (unmark-key-as-pressed! key-code)
+  (doseq [on-keyup-f (env/get-events-on-keyup-f key-code)]
+         (on-keyup-f key-code)))
+
 (defn prevent-keypress-default!
   ; @ignore
   ;
+  ; @description
+  ; Enables the prevention of the default browser keypress event associated with the given key code.
+  ;
   ; @param (integer) key-code
+  ;
+  ; @usage
+  ; (prevent-keypress-default! 27)
   [key-code]
   (swap! state/PREVENTED-KEYS assoc key-code true))
 
 (defn enable-keypress-default!
   ; @ignore
   ;
+  ; @description
+  ; Disables the prevention of the default browser keypress event associated with the given key code.
+  ;
   ; @param (integer) key-code
+  ;
+  ; @usage
+  ; (enable-keypress-default! 27)
   [key-code]
   (swap! state/PREVENTED-KEYS dissoc key-code))
 
@@ -44,20 +141,68 @@
   ; @ignore
   ;
   ; @description
-  ; Stores the event properties (or overwrites it when a keypress event registered again).
+  ; Stores the properties of the given keypress event (or overwrites it if the keypress event is re-registered).
   ;
   ; @param (keyword) event-id
   ; @param (map) event-props
+  ;
+  ; @usage
+  ; (store-event-props! :my-event {...})
   [event-id event-props]
-  ; @note (#1160)
   (swap! state/KEYPRESS-EVENTS assoc event-id event-props))
 
 (defn remove-event-props!
   ; @ignore
   ;
+  ; @description
+  ; Removes the properties of the keypress event that corresponds to the given event ID.
+  ;
   ; @param (keyword) event-id
+  ;
+  ; @usage
+  ; (remove-event-props! :my-event)
   [event-id]
   (swap! state/KEYPRESS-EVENTS dissoc event-id))
+
+;; ----------------------------------------------------------------------------
+;; ----------------------------------------------------------------------------
+
+(defn set-event-exclusivity!
+  ; @ignore
+  ;
+  ; @note
+  ; - If a keypress event is registered as exclusive, other keypress events associated with the same key code are ignored.
+  ; - If multiple registered keypress events (associated with the same key code) are registered
+  ;   as exclusive, the last registered takes presedence (as the 'most' exclusive).
+  ; - Deregistering the exclusive keypress event restores exclusivity of the previous exclusive one (if any).
+  ;   Therefore, event IDs of exclusive events are stored in a vector (in order of registration time).
+  ; - The event exclusivity is granted by removing other events (associated with the same key code) from the event cache.
+  ;
+  ; @description
+  ; Grants exclusivity for a specific registered keypress event over other keypress events associated with the same key code.
+  ;
+  ; @param (keyword) event-id
+  ; @param (map) event-props
+  ; {:key-code (integer)}
+  ;
+  ; @usage
+  ; (set-event-exclusivity! :my-event {...})
+  [event-id {:keys [key-code]}]
+  (swap! state/EXCLUSIVE-EVENTS update key-code vector/conj-item event-id))
+
+(defn unset-event-exclusivity!
+  ; @ignore
+  ;
+  ; @description
+  ; ...
+  ;
+  ; @param (keyword) event-id
+  ;
+  ; @usage
+  ; (unset-event-exclusivity! :my-event)
+  [event-id]
+  (let [key-code (env/get-event-key-code event-id)]
+       (swap! state/EXCLUSIVE-EVENTS update key-code vector/remove-item event-id)))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -65,22 +210,28 @@
 (defn cache-event!
   ; @ignore
   ;
+  ; @note
+  ; - The keypress handler uses cache to store event IDs associated with key codes.
+  ; - When a key is pressed the keypress handler gets the event IDs (that are associated
+  ;   with the key code of the pressed key) from the event cache.
+  ; - Caching events helps the keypress handler to get the event IDs as quick as possible,
+  ;   without performing any action when a key gets pressed.
+  ;
   ; @description
-  ; When registering a keypress event the event ID will be cached for performance reasons.
-  ; By caching event IDs the keypress handler doesn't have to look up all
-  ; the registered keypress events when a key pressed or released.
-  ; Every registered key-code has a vector in the cache with the event IDs of
-  ; the events which use that key-code.
+  ; Adds the given event ID to the corresponding key code in the event cache.
   ;
   ; @param (keyword) event-id
   ; @param (map) event-props
   ; {:key-code (integer)
   ;  :on-keydown-f (function)(opt)
   ;  :on-keyup-f (function)(opt)}
+  ;
+  ; @usage
+  ; (cache-event! :my-event {...})
   [event-id {:keys [key-code on-keydown-f on-keyup-f]}]
   ; @note (#1160)
-  ; If a keypress event registered again, the cache doesn't store its ID again
-  ; (to avoid duplicates in the cache).
+  ; Using the 'conj-item-once' function helps prevent duplications of event IDs within the event cache,
+  ; escpecially when an event gets re-registered with the same event ID.
   (if on-keydown-f (swap! state/EVENT-CACHE update-in [key-code :keydown-events] vector/conj-item-once event-id))
   (if on-keyup-f   (swap! state/EVENT-CACHE update-in [key-code :keyup-events]   vector/conj-item-once event-id)))
 
@@ -88,96 +239,88 @@
   ; @ignore
   ;
   ; @description
-  ; Removes the event from the cache.
+  ; Removes the given event ID from the event cache.
   ;
   ; @param (keyword) event-id
+  ;
+  ; @usage
+  ; (uncache-event! :my-event)
   [event-id]
-  (let [key-code (get-in @state/KEYPRESS-EVENTS [event-id :key-code])]
+  (let [key-code (env/get-event-key-code event-id)]
        (swap! state/EVENT-CACHE update-in [key-code :keydown-events] vector/remove-item event-id)
        (swap! state/EVENT-CACHE update-in [key-code :keyup-events]   vector/remove-item event-id)))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
 
-(defn set-exclusivity!
+(defn rebuild-key-cache!
   ; @ignore
   ;
-  ; @param (keyword) event-id
-  ; @param (map) event-props
-  ; {}
-  [event-id {:keys [key-code] :as event-props}]
-  ; By storing the event ID in the EXCLUSIVE-EVENTS vector, later when the event
-  ; will be removed, the previous most exclusive event could be restored using the
-  ; EXCLUSIVE-EVENTS vector.
-  (swap! state/EXCLUSIVE-EVENTS update key-code vector/conj-item event-id)
-  ; Removing all the registered events from the cache with the same key-code
-  ; and the event will be the only one in the cache with this key-code.
+  ; @description
+  ; Rebuilds the cache of the given key code.
+  ;
+  ; @param (integer) key-code
+  ;
+  ; @usage
+  ; (rebuild-key-cache! 27)
+  [key-code]
+  (doseq [[event-id event-props] @state/KEYPRESS-EVENTS]
+         (if (= key-code (:key-code event-props))
+             (cache-event! event-id event-props))))
+
+(defn empty-key-cache!
+  ; @ignore
+  ;
+  ; @description
+  ; Removes cached event IDs associated with the given key code.
+  ;
+  ; @param (integer) key-code
+  ;
+  ; @usage
+  ; (empty-key-cache! 27)
+  [key-code]
   (swap! state/EVENT-CACHE dissoc key-code))
 
-(defn unset-exclusivity!
-  ; @ignore
-  ;
-  ; @param (keyword) event-id
-  [event-id]
-  ; Most exclusive: last registered exclusive event with the same key-code.
-  ; Only exclusive: only registered exclusive event with the same key-code.
-  ; + The only exclusive is the most exclusive of course.
-  (let [key-code         (get-in @state/KEYPRESS-EVENTS [event-id :key-code])
-        exclusive-events (get @state/EXCLUSIVE-EVENTS key-code)
-        most-exclusive?  (vector/item-last? exclusive-events event-id)
-        only-exclusive?  (vector/item-only? exclusive-events event-id)]
-       (swap! state/EXCLUSIVE-EVENTS update key-code vector/remove-item event-id)
-       ; If the event was ...
-       ; ... the only exclusive with the same key-code the event cache
-       ;     will be restored.
-       ; ... the most but not only exclusive with the same key-code
-       ;     the second most exclusive will be the new most exclusive event.
-       ; ... not the only or most exclusive with the same key-code
-       ;     the cache will be unchanged.
-       (cond only-exclusive? (doseq [[event-id event-props] @state/KEYPRESS-EVENTS]
-                                    (if (= key-code (:key-code event-props))
-                                        (cache-event! event-id event-props)))
-             most-exclusive? (let [second-exclusive-id    (-> exclusive-events vector/remove-last-item vector/last-item)
-                                   second-exclusive-props (get @state/KEYPRESS-EVENTS second-exclusive-id)]
-                                  (cache-event! second-exclusive-id second-exclusive-props)))))
-
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
 
-(defn mark-key-as-pressed!
+(defn cache-second-exclusive-event!
   ; @ignore
   ;
-  ; @param (integer) key-code
-  [key-code]
-  (swap! state/PRESSED-KEYS assoc key-code true))
-
-(defn unmark-key-as-pressed!
-  ; @ignore
+  ; @description
+  ; Caches the event ID of the second exclusive event associated with the given key code.
   ;
   ; @param (integer) key-code
+  ;
+  ; @usage
+  ; (cache-second-exclusive-event! 27)
   [key-code]
-  (swap! state/PRESSED-KEYS dissoc key-code))
+  (let [event-id    (env/get-key-second-exclusive-event key-code)
+        event-props (env/get-event-props event-id)]
+       (cache-event! event-id event-props)))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
 
 (defn reg-keypress-event!
+  ; @description
+  ; - Registers a keypress event associated with the given key code.
+  ; - When the key is pressed, the given 'on-keydown-f' function will be called.
+  ;   When the key is released, the given 'on-keyup-f' function will be called.
+  ; - If the type mode of the keypress handler is enabled, the event functions
+  ;   are ignored, unless the event is registered with the '{:in-type-mode? true}' setting.
+  ; - The '{:exclusive? true}' setting grants exclusivity over other registered keypress
+  ;   events associated with the same key code that are ignored until the exclusive one is removed.
+  ;   If multiple events are registered as exclusive, the last registered is declared as the exclusive one.
+  ;
   ; @param (keyword)(opt) event-id
   ; @param (map) event-props
   ; {:exclusive? (boolean)(opt)
-  ;   If TRUE, other (previously registered) keypress events with the same
-  ;   key-code will be ignored, until the exclusive one is removed.
-  ;   If more than one exclusive event is registered with the same key-code,
-  ;   the last registered will always be the exclusive one.
-  ;   Default: false
   ;  :key-code (integer)
   ;  :in-type-mode? (boolean)(opt)
-  ;   If TRUE, the event won't be ignored when the type mode is on.
-  ;   Default: false
   ;  :on-keydown-f (function)(opt)
   ;  :on-keyup-f (function)(opt)
-  ;  :prevent-default? (boolean)(opt)
-  ;   Default: false}
+  ;  :prevent-default? (boolean)(opt)}
   ;
   ; @usage
   ; (reg-keypress-event! {...})
@@ -191,46 +334,36 @@
    (reg-keypress-event! (random/generate-keyword) event-props))
 
   ([event-id {:keys [exclusive? key-code prevent-default?] :as event-props}]
-   (if prevent-default? (prevent-keypress-default! key-code))
-   (if exclusive?       (set-exclusivity! event-id event-props))
-   (if-let [no-exclusive-set? (-> @state/EXCLUSIVE-EVENTS (get key-code) empty?)]
-           (cache-event! event-id event-props)
-           (if exclusive? (cache-event! event-id event-props)))
-   (store-event-props! event-id event-props)))
+   (when prevent-default? (prevent-keypress-default! key-code))
+   (when exclusive?       (empty-key-cache!          key-code)
+                          (set-event-exclusivity!    event-id event-props)
+                          (cache-event!              event-id event-props))
+   (when :always          (store-event-props!        event-id event-props))
+   (if-not (env/any-exclusive-event-set? key-code)
+           (cache-event! event-id event-props))))
 
 (defn dereg-keypress-event!
+  ; @description
+  ; - Deregisters the keypress event that corresponds to the given event ID.
+  ; - If the keypress event is registered as exclusive, re-enables the keypress
+  ;   events associated with the same key code.
+  ;
   ; @param (keyword) event-id
   ;
   ; @usage
   ; (dereg-keypress-event! :my-event)
   [event-id]
-  (if (env/enable-default? event-id)
-      (let [key-code (get-in @state/KEYPRESS-EVENTS [event-id :key-code])]
-           (enable-keypress-default! key-code)))
-  (if-let [exclusive? (get-in @state/KEYPRESS-EVENTS [event-id :exclusive?])]
-          (unset-exclusivity! event-id))
-  (uncache-event!      event-id)
-  (remove-event-props! event-id))
-
-;; ----------------------------------------------------------------------------
-;; ----------------------------------------------------------------------------
-
-(defn key-pressed
-  ; @ignore
-  ;
-  ; @param (integer) key-code
-  [key-code]
-  (mark-key-as-pressed! key-code)
-  (doseq [on-keydown-f (env/get-keydown-events key-code)]
-         (on-keydown-f)))
-
-(defn key-released
-  ; @ignore
-  ;
-  ; @param (integer) key-code
-  [key-code]
-  ; @bug (#5050)
-  ; https://stackoverflow.com/questions/25438608/javascript-keyup-isnt-called-when-command-and-another-is-pressed
-  (unmark-key-as-pressed! key-code)
-  (doseq [on-keyup-f (env/get-keyup-events key-code)]
-         (on-keyup-f)))
+  ; If the deregistered keypress event ...
+  ; ... was the only exclusive event associated with the same key code,
+  ;     rebuilds the cache of the key code.
+  ; ... was the most (and not only!) exclusive event associated with the same key code,
+  ;     caches the second most exclusive keypress event.
+  ; ... was not the only or most exclusive event associated with the same key code,
+  ;     there is no need to change the cache.
+  (let [key-code (env/get-event-key-code event-id)]
+       (when (env/enable-default?                event-id) (enable-keypress-default!      key-code))
+       (cond (env/event-only-exclusive?          event-id) (rebuild-key-cache!            key-code)
+             (env/event-most-exclusive?          event-id) (cache-second-exclusive-event! key-code))
+       (when (env/event-registered-as-exclusive? event-id) (unset-event-exclusivity!      event-id))
+       (when :always                                       (remove-event-props!           event-id)
+                                                           (uncache-event!                event-id))))

@@ -33,13 +33,3 @@
 ;
 ; @atom (boolean)
 (def TYPE-MODE? (atom false))
-
-; @ignore
-;
-; @atom (map)
-(def KEYDOWN-TIMEOUTS (atom {}))
-
-; @ignore
-;
-; @atom (map)
-(def KEYUP-TIMEOUTS (atom {}))
