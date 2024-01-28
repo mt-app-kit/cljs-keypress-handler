@@ -1,7 +1,7 @@
 
 (ns keypress-handler.env
-    (:require [keypress-handler.state :as state]
-              [fruits.vector.api :as vector]))
+    (:require [fruits.vector.api      :as vector]
+              [keypress-handler.state :as state]))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
