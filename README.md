@@ -8,17 +8,17 @@ The <strong>cljs-keypress-handler</strong> is a simple keypress event handler fo
 ### deps.edn
 
 ```
-{:deps {bithandshake/cljs-keypress-handler {:git/url "https://github.com/bithandshake/cljs-keypress-handler"
-                                            :sha     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}}}
+{:deps {mt-app-kit/cljs-keypress-handler {:git/url "https://github.com/mt-app-kit/cljs-keypress-handler"
+                                          :sha     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}}}
 ```
 
 ### Current version
 
-Check out the latest commit on the [release branch](https://github.com/bithandshake/cljs-keypress-handler/tree/release).
+Check out the latest commit on the [release branch](https://github.com/mt-app-kit/cljs-keypress-handler/tree/release).
 
 ### Documentation
 
-The <strong>cljs-keypress-handler</strong> functional documentation is [available here](https://bithandshake.github.io/cljs-keypress-handler).
+The <strong>cljs-keypress-handler</strong> functional documentation is [available here](https://mt-app-kit.github.io/cljs-keypress-handler).
 
 ### Changelog
 

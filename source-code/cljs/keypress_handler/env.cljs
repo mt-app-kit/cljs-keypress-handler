@@ -48,7 +48,7 @@
   ; Returns the key codes of the currently pressed keys.
   ;
   ; @usage
-  ; (get-pressed-keys?)
+  ; (get-pressed-keys)
   ; =>
   ; [27 65]
   ;
@@ -79,7 +79,7 @@
   ;
   ; @description
   ; Returns the properties of the registered keypress event that corresponds to the given event ID.
-
+  ;
   ; @param (keyword) event-id
   ;
   ; @usage
@@ -96,7 +96,7 @@
   ;
   ; @description
   ; Returns the key code associated with the registered keypress event that corresponds to the given event ID.
-
+  ;
   ; @param (keyword) event-id
   ;
   ; @usage
@@ -176,7 +176,7 @@
   ; - Returns the 'on-keydown-f' functions of registered keypress events associated with the given key code.
   ; - If the keypress handler is in type mode, returns the 'on-keydown-f' functions only of keypress events
   ;   registered with the '{:in-type-mode? true}' setting.
-  ; - Doesn't return the 'on-keydown-f' function of keypress events that are currently removed from the event
+  ; - Doesn't return the 'on-keydown-f' function of keypress events that are temporarly removed from the event
   ;   cache due to the exclusivity of another keypress event.
   ;
   ; @param (integer) key-code
@@ -201,7 +201,7 @@
   ; - Returns the 'on-keyup-f' functions of registered keypress events associated with the given key code.
   ; - If the keypress handler is in type mode, returns the 'on-keyup-f' functions only of keypress events
   ;   registered with the '{:in-type-mode? true}' setting.
-  ; - Doesn't return the 'on-keyup-f' function of keypress events that are currently removed from the event
+  ; - Doesn't return the 'on-keyup-f' function of keypress events that are temporarly removed from the event
   ;   cache due to the exclusivity of another keypress event.
   ;
   ; @param (integer) key-code

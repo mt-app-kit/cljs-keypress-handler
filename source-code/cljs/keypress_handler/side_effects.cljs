@@ -74,7 +74,7 @@
   ; - Calls the 'on-keydown-f' functions of registered keypress events associated with the given key code.
   ; - If the keypress handler is in type mode, calls the 'on-keydown-f' functions only of keypress events
   ;   registered with the '{:in-type-mode? true}' setting.
-  ; - Doesn't call the 'on-keydown-f' function of keypress events that are currently removed from the event
+  ; - Doesn't call the 'on-keydown-f' function of keypress events that are temporarly removed from the event
   ;   cache due to the exclusivity of another keypress event.
   ;
   ; @param (integer) key-code
@@ -94,7 +94,7 @@
   ; - Calls the 'on-keyup-f' functions of registered keypress events associated with the given key code.
   ; - If the keypress handler is in type mode, calls the 'on-keyup-f' functions only of keypress events
   ;   registered with the '{:in-type-mode? true}' setting.
-  ; - Doesn't call the 'on-keyup-f' function of keypress events that are currently removed from the event
+  ; - Doesn't call the 'on-keyup-f' function of keypress events that are temporarly removed from the event
   ;   cache due to the exclusivity of another keypress event.
   ;
   ; @param (integer) key-code
@@ -141,7 +141,7 @@
   ; @ignore
   ;
   ; @description
-  ; Stores the properties of the given keypress event (or overwrites it if the keypress event is re-registered).
+  ; Stores the properties of the given keypress event (or overwrites it if the keypress event is already registered).
   ;
   ; @param (keyword) event-id
   ; @param (map) event-props
@@ -175,7 +175,7 @@
   ; - If multiple registered keypress events (associated with the same key code) are registered
   ;   as exclusive, the last registered takes presedence (as the 'most' exclusive).
   ; - Deregistering the exclusive keypress event restores exclusivity of the previous exclusive one (if any).
-  ;   Therefore, event IDs of exclusive events are stored in a vector (in order of registration time).
+  ;   Therefore, event IDs of exclusive events are stored in a vector in order of registration time.
   ; - The event exclusivity is granted by removing other events (associated with the same key code) from the event cache.
   ;
   ; @description
@@ -215,7 +215,7 @@
   ; - When a key is pressed the keypress handler gets the event IDs (that are associated
   ;   with the key code of the pressed key) from the event cache.
   ; - Caching events helps the keypress handler to get the event IDs as quick as possible,
-  ;   without performing any action when a key gets pressed.
+  ;   without performing any action (e.g., deriving event IDs from the event state) when a key gets pressed.
   ;
   ; @description
   ; Adds the given event ID to the corresponding key code in the event cache.
@@ -305,12 +305,12 @@
 (defn reg-keypress-event!
   ; @description
   ; - Registers a keypress event associated with the given key code.
-  ; - When the key is pressed, the given 'on-keydown-f' function will be called.
-  ;   When the key is released, the given 'on-keyup-f' function will be called.
+  ; - When the key is pressed, the given 'on-keydown-f' function is called.
+  ;   When the key is released, the given 'on-keyup-f' function is called.
   ; - If the type mode of the keypress handler is enabled, the event functions
   ;   are ignored, unless the event is registered with the '{:in-type-mode? true}' setting.
   ; - The '{:exclusive? true}' setting grants exclusivity over other registered keypress
-  ;   events associated with the same key code that are ignored until the exclusive one is removed.
+  ;   events associated with the same key code (that are ignored until the exclusive one is removed).
   ;   If multiple events are registered as exclusive, the last registered is declared as the exclusive one.
   ;
   ; @param (keyword)(opt) event-id
