@@ -329,7 +329,8 @@
   ; (reg-keypress-event! :my-keypress-event {...})
   ;
   ; @usage
-  ; (reg-keypress-event! {:key-code 65 :on-keydown-f (fn [key-code] ...)})
+  ; (reg-keypress-event! {:key-code 65 :on-keydown-f (fn [key-code] ...)
+  ;                                    :on-keyup-f   (fn [key-code] ...)})
   ([event-props]
    (reg-keypress-event! (random/generate-keyword) event-props))
 
@@ -345,8 +346,8 @@
 (defn dereg-keypress-event!
   ; @description
   ; - Deregisters the keypress event that corresponds to the given event ID.
-  ; - If the keypress event is registered as exclusive, re-enables the keypress
-  ;   events associated with the same key code.
+  ; - If the keypress event is registered as exclusive, re-enables other temporarly
+  ;   disabled keypress events associated with the same key code.
   ;
   ; @param (keyword) event-id
   ;
