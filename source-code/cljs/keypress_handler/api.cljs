@@ -7,6 +7,17 @@
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
 
+; @tutorial Keypress events
+;
+; Keypress events are registered side effect functions associated to keydown or keyup event of a specific key code.
+;
+; @usage
+; (reg-keypress-event! {:key-code 65 {:on-keydown-f (fn [key-code] ...)
+;                                     :on-keyup-f   (fn [key-code] ...)}})
+
+;; ----------------------------------------------------------------------------
+;; ----------------------------------------------------------------------------
+
 ; @redirect (keypress-handler.env/*)
 (def type-mode-enabled?  env/type-mode-enabled?)
 (def type-mode-disabled? env/type-mode-disabled?)

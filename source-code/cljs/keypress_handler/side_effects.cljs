@@ -10,8 +10,7 @@
 
 (defn enable-type-mode!
   ; @note
-  ; Keypress events that are registered without the '{:in-type-mode? true}' setting
-  ; are ignored while the type mode is enabled.
+  ; Keypress events that are registered without the '{:in-type-mode? true}' setting are ignored while the type mode is enabled.
   ;
   ; @description
   ; Enables the type mode of the keypress handler.
@@ -23,8 +22,7 @@
 
 (defn disable-type-mode!
   ; @note
-  ; Keypress events that are registered without the '{:in-type-mode? true}' setting
-  ; are ignored while the type mode is enabled.
+  ; Keypress events that are registered without the '{:in-type-mode? true}' setting are ignored while the type mode is enabled.
   ;
   ; @description
   ; Disables the type mode of the keypress handler.
