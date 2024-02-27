@@ -9,7 +9,7 @@
 
 ; @tutorial Keypress events
 ;
-; Keypress events are registered side effect functions associated to keydown or keyup event of a specific key code.
+; Keypress events are registered side effect functions associated to the keydown or keyup event of a specific key code.
 ;
 ; @usage
 ; (reg-keypress-event! {:key-code 65 {:on-keydown-f (fn [key-code] ...)
