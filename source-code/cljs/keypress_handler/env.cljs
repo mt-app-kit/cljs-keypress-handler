@@ -174,7 +174,7 @@
   ; - Returns the 'on-keydown-f' functions of registered keypress events associated with the given key code.
   ; - If the keypress handler is in type mode, returns the 'on-keydown-f' functions only of keypress events
   ;   registered with the '{:in-type-mode? true}' setting.
-  ; - Doesn't return the 'on-keydown-f' function of keypress events that are temporarly removed from the event
+  ; - does not return the 'on-keydown-f' function of keypress events that are temporarly removed from the event
   ;   cache due to the exclusivity of another keypress event.
   ;
   ; @param (integer) key-code
@@ -199,7 +199,7 @@
   ; - Returns the 'on-keyup-f' functions of registered keypress events associated with the given key code.
   ; - If the keypress handler is in type mode, returns the 'on-keyup-f' functions only of keypress events
   ;   registered with the '{:in-type-mode? true}' setting.
-  ; - Doesn't return the 'on-keyup-f' function of keypress events that are temporarly removed from the event
+  ; - does not return the 'on-keyup-f' function of keypress events that are temporarly removed from the event
   ;   cache due to the exclusivity of another keypress event.
   ;
   ; @param (integer) key-code
@@ -347,7 +347,7 @@
   ;
   ; @return (boolean)
   [event-id]
-  ; If a keypress event is registered as exclusive that doesn't mean it is considered as the exclusive event at the moment.
+  ; If a keypress event is registered as exclusive that does not mean it is considered as the exclusive event at the moment.
   ; Another keypress event might be registered as exclusive later and took its exclusivity.
   (if-let [event-props (get-event-props event-id)]
           (:exclusive? event-props)))

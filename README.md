@@ -16,10 +16,10 @@ The <strong>cljs-keypress-handler</strong> is a simple keypress event handler fo
 
 Check out the latest commit on the [release branch](https://github.com/mt-app-kit/cljs-keypress-handler/tree/release).
 
-### Documentation
-
-The <strong>cljs-keypress-handler</strong> functional documentation is [available here](https://mt-app-kit.github.io/cljs-keypress-handler).
-
 ### Changelog
 
 You can track the changes of the <strong>cljs-keypress-handler</strong> library [here](CHANGES.md).
+
+# Documentation
+
+The <strong>cljs-keypress-handler</strong> functional documentation is [available here](https://mt-app-kit.github.io/cljs-keypress-handler).

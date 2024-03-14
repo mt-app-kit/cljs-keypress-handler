@@ -72,7 +72,7 @@
   ; - Calls the 'on-keydown-f' functions of registered keypress events associated with the given key code.
   ; - If the keypress handler is in type mode, calls the 'on-keydown-f' functions only of keypress events
   ;   registered with the '{:in-type-mode? true}' setting.
-  ; - Doesn't call the 'on-keydown-f' function of keypress events that are temporarly removed from the event
+  ; - does not call the 'on-keydown-f' function of keypress events that are temporarly removed from the event
   ;   cache due to the exclusivity of another keypress event.
   ;
   ; @param (integer) key-code
@@ -92,7 +92,7 @@
   ; - Calls the 'on-keyup-f' functions of registered keypress events associated with the given key code.
   ; - If the keypress handler is in type mode, calls the 'on-keyup-f' functions only of keypress events
   ;   registered with the '{:in-type-mode? true}' setting.
-  ; - Doesn't call the 'on-keyup-f' function of keypress events that are temporarly removed from the event
+  ; - does not call the 'on-keyup-f' function of keypress events that are temporarly removed from the event
   ;   cache due to the exclusivity of another keypress event.
   ;
   ; @param (integer) key-code
