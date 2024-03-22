@@ -3,5 +3,5 @@
  :deps  {mt-utilities/cljc-fruits  {:git/url "https://github.com/mt-utilities/cljc-fruits"
                                     :sha     "6b5c9c060bdff84d0cd0bce908b64b268e5e6f0e"}
          mt-utilities/cljs-window  {:git/url "https://github.com/mt-utilities/cljs-window"
-                                    :sha     "7ef406aab5fd912d21544c0c5154d3c53fad698d"}
+                                    :sha     "4cc942f76a91c4dd646d5b8b31eb855a723e634d"}
          org.clojure/clojurescript {:mvn/version "1.10.891"}}}
