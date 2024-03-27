@@ -3,7 +3,7 @@
     (:require [fruits.random.api      :as random]
               [fruits.vector.api      :as vector]
               [keypress-handler.env   :as env]
-              [keypress-handler.state :as state]))
+              [common-state.api :as common-state]))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -18,7 +18,7 @@
   ; @usage
   ; (enable-type-mode!)
   []
-  (reset! state/TYPE-MODE? true))
+  (common-state/assoc-state! :keypress-handler :settings :type-mode? true))
 
 (defn disable-type-mode!
   ; @note
@@ -30,7 +30,7 @@
   ; @usage
   ; (disable-type-mode!)
   []
-  (reset! state/TYPE-MODE? false))
+  (common-state/assoc-state! :keypress-handler :settings :type-mode? false))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -46,7 +46,7 @@
   ; @usage
   ; (mark-key-as-pressed! 27)
   [key-code]
-  (swap! state/PRESSED-KEYS assoc key-code true))
+  (common-state/assoc-state! :keypress-handler :pressed-keys key-code true))
 
 (defn unmark-key-as-pressed!
   ; @ignore
@@ -59,7 +59,7 @@
   ; @usage
   ; (unmark-key-as-pressed! 27)
   [key-code]
-  (swap! state/PRESSED-KEYS dissoc key-code))
+  (common-state/dissoc-state! :keypress-handler :pressed-keys key-code))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -117,7 +117,7 @@
   ; @usage
   ; (prevent-keypress-default! 27)
   [key-code]
-  (swap! state/PREVENTED-KEYS assoc key-code true))
+  (common-state/assoc-state! :keypress-handler :prevented-keys key-code true))
 
 (defn enable-keypress-default!
   ; @ignore
@@ -130,7 +130,7 @@
   ; @usage
   ; (enable-keypress-default! 27)
   [key-code]
-  (swap! state/PREVENTED-KEYS dissoc key-code))
+  (common-state/dissoc-state! :keypress-handler :prevented-keys key-code))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -147,7 +147,7 @@
   ; @usage
   ; (store-event-props! :my-event {...})
   [event-id event-props]
-  (swap! state/KEYPRESS-EVENTS assoc event-id event-props))
+  (common-state/assoc-state! :keypress-handler :keypress-events event-id event-props))
 
 (defn remove-event-props!
   ; @ignore
@@ -160,7 +160,7 @@
   ; @usage
   ; (remove-event-props! :my-event)
   [event-id]
-  (swap! state/KEYPRESS-EVENTS dissoc event-id))
+  (common-state/dissoc-state! :keypress-handler :keypress-events event-id))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -186,7 +186,7 @@
   ; @usage
   ; (set-event-exclusivity! :my-event {...})
   [event-id {:keys [key-code]}]
-  (swap! state/EXCLUSIVE-EVENTS update key-code vector/conj-item event-id))
+  (common-state/update-state! :keypress-handler :exclusive-events update key-code vector/conj-item event-id))
 
 (defn unset-event-exclusivity!
   ; @ignore
@@ -200,7 +200,7 @@
   ; (unset-event-exclusivity! :my-event)
   [event-id]
   (let [key-code (env/get-event-key-code event-id)]
-       (swap! state/EXCLUSIVE-EVENTS update key-code vector/remove-item event-id)))
+       (common-state/update-state! :keypress-handler :exclusive-events update key-code vector/remove-item event-id)))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -226,12 +226,12 @@
   ;
   ; @usage
   ; (cache-event! :my-event {...})
-  [event-id {:keys [key-code on-keydown-f on-keyup-f]}]
+  [event-id {:keys [key-code on-keydown-f on-keyup-f] :as x}]
   ; @note (#1160)
   ; Using the 'conj-item-once' function helps prevent duplications of event IDs within the event cache,
   ; escpecially when an event gets re-registered with the same event ID.
-  (if on-keydown-f (swap! state/EVENT-CACHE update-in [key-code :keydown-events] vector/conj-item-once event-id))
-  (if on-keyup-f   (swap! state/EVENT-CACHE update-in [key-code :keyup-events]   vector/conj-item-once event-id)))
+  (if on-keydown-f (common-state/update-state! :keypress-handler :event-cache update-in [key-code :keydown-events] vector/conj-item-once event-id))
+  (if on-keyup-f   (common-state/update-state! :keypress-handler :event-cache update-in [key-code :keyup-events]   vector/conj-item-once event-id)))
 
 (defn uncache-event!
   ; @ignore
@@ -245,8 +245,8 @@
   ; (uncache-event! :my-event)
   [event-id]
   (let [key-code (env/get-event-key-code event-id)]
-       (swap! state/EVENT-CACHE update-in [key-code :keydown-events] vector/remove-item event-id)
-       (swap! state/EVENT-CACHE update-in [key-code :keyup-events]   vector/remove-item event-id)))
+       (common-state/update-state! :keypress-handler :event-cache update-in [key-code :keydown-events] vector/remove-item event-id)
+       (common-state/update-state! :keypress-handler :event-cache update-in [key-code :keyup-events]   vector/remove-item event-id)))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -262,7 +262,7 @@
   ; @usage
   ; (rebuild-key-cache! 27)
   [key-code]
-  (doseq [[event-id event-props] @state/KEYPRESS-EVENTS]
+  (doseq [[event-id event-props] (common-state/get-state :keypress-handler :keypress-events)]
          (if (= key-code (:key-code event-props))
              (cache-event! event-id event-props))))
 
@@ -277,7 +277,7 @@
   ; @usage
   ; (empty-key-cache! 27)
   [key-code]
-  (swap! state/EVENT-CACHE dissoc key-code))
+  (common-state/dissoc-state! :keypress-handler :event-cache key-code))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -364,5 +364,5 @@
        (cond (env/event-only-exclusive?          event-id) (rebuild-key-cache!            key-code)
              (env/event-most-exclusive?          event-id) (cache-second-exclusive-event! key-code))
        (when (env/event-registered-as-exclusive? event-id) (unset-event-exclusivity!      event-id))
-       (when :always                                       (remove-event-props!           event-id)
-                                                           (uncache-event!                event-id))))
+       (when :always                                       (uncache-event!                event-id)
+                                                           (remove-event-props!           event-id))))

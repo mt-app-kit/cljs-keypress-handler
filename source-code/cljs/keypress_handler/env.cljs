@@ -1,7 +1,7 @@
 
 (ns keypress-handler.env
     (:require [fruits.vector.api      :as vector]
-              [keypress-handler.state :as state]))
+              [common-state.api :as common-state]))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -20,7 +20,7 @@
   ;
   ; @return (boolean)
   []
-  (-> state/TYPE-MODE? deref))
+  (common-state/get-state :keypress-handler :settings :type-mode?))
 
 (defn type-mode-disabled?
   ; @note
@@ -36,7 +36,7 @@
   ;
   ; @return (boolean)
   []
-  (-> state/TYPE-MODE? deref not))
+  (-> (type-mode-enabled?) not))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -52,7 +52,7 @@
   ;
   ; @return (integers in vector)
   []
-  (keys @state/PRESSED-KEYS))
+  (-> (common-state/get-state :keypress-handler :pressed-keys) keys))
 
 (defn key-pressed?
   ; @description
@@ -67,7 +67,7 @@
   ;
   ; @return (boolean)
   [key-code]
-  (get @state/PRESSED-KEYS key-code))
+  (common-state/get-state :keypress-handler :pressed-keys key-code))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -87,7 +87,7 @@
   ;
   ; @return (map)
   [event-id]
-  (get @state/KEYPRESS-EVENTS event-id))
+  (common-state/get-state :keypress-handler :keypress-events event-id))
 
 (defn get-event-key-code
   ; @ignore
@@ -107,6 +107,23 @@
   (if-let [event-props (get-event-props event-id)]
           (:key-code event-props)))
 
+(defn get-all-events
+  ; @ignore
+  ;
+  ; @description
+  ; Returns the properties of the registered keypress events.
+  ;
+  ; @usage
+  ; (get-all-events)
+  ; =>
+  ; {:my-event      {...}
+  ;  :another-event {...}
+  ;  ...}
+  ;
+  ; @return (map)
+  []
+  (common-state/get-state :keypress-handler :keypress-events))
+
 (defn get-other-events
   ; @ignore
   ;
@@ -118,11 +135,13 @@
   ; @usage
   ; (get-other-events :my-event)
   ; =>
-  ; {:another-event {...}}
+  ; {:another-event {...}
+  ;  ...}
   ;
   ; @return (map)
   [event-id]
-  (dissoc @state/KEYPRESS-EVENTS event-id))
+  (-> (get-all-events)
+      (dissoc event-id)))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -189,7 +208,7 @@
   (letfn [(f0 [result event-id] (if-let [on-keydown-f (get-event-on-keydown-f event-id)]
                                         (-> result (conj on-keydown-f))
                                         (-> result)))]
-         (let [event-ids (get-in @state/EVENT-CACHE [key-code :keydown-events])]
+         (let [event-ids (common-state/get-state :keypress-handler :event-cache key-code :keydown-events)]
               (reduce f0 [] event-ids))))
 
 (defn get-events-on-keyup-f
@@ -214,7 +233,7 @@
   (letfn [(f0 [result event-id] (if-let [on-keyup-f (get-event-on-keyup-f event-id)]
                                         (-> result (conj on-keyup-f))
                                         (-> result)))]
-         (let [event-ids (get-in @state/EVENT-CACHE [key-code :keyup-events])]
+         (let [event-ids (common-state/get-state :keypress-handler :event-cache key-code :keyup-events)]
               (reduce f0 [] event-ids))))
 
 ;; ----------------------------------------------------------------------------
@@ -293,7 +312,7 @@
   ;
   ; @return (keywords in vector)
   [key-code]
-  (get @state/EXCLUSIVE-EVENTS key-code))
+  (common-state/get-state :keypress-handler :exclusive-events key-code))
 
 (defn any-exclusive-event-set?
   ; @ignore

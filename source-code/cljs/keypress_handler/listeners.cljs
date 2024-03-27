@@ -1,8 +1,8 @@
 
 (ns keypress-handler.listeners
     (:require [keypress-handler.side-effects :as side-effects]
-              [keypress-handler.state        :as state]
-              [window.api                    :as window]))
+              [window.api                    :as window]
+              [common-state.api :as common-state]))
 
 ;; ----------------------------------------------------------------------------
 ;; ----------------------------------------------------------------------------
@@ -16,8 +16,8 @@
 ; https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
 (def ON-KEYDOWN-LISTENER (fn [e] (if (-> e .-repeat not)
                                      (let [key-code (-> e .-keyCode)]
-                                          (if (-> state/PREVENTED-KEYS deref (get key-code))
-                                              (-> e .preventDefault))
+                                          (if (common-state/get-state :keypress-handler :prevented-keys key-code)
+                                              (.preventDefault e))
                                           (side-effects/key-pressed key-code)))))
 
 ; @ignore
@@ -27,8 +27,8 @@
 ; @bug (#0180)
 (def ON-KEYUP-LISTENER (fn [e] (if (-> e .-repeat not)
                                    (let [key-code (-> e .-keyCode)]
-                                        (if (-> state/PREVENTED-KEYS deref (get key-code))
-                                            (-> e .preventDefault))
+                                        (if (common-state/get-state :keypress-handler :prevented-keys key-code)
+                                            (.preventDefault e))
                                         (side-effects/key-released key-code)))))
 
 ;; ----------------------------------------------------------------------------
