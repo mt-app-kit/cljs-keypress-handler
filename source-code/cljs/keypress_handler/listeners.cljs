@@ -1,7 +1,7 @@
 
 (ns keypress-handler.listeners
     (:require [keypress-handler.side-effects :as side-effects]
-              [window.api                    :as window]
+              [window-a.api                    :as window]
               [common-state.api :as common-state]))
 
 ;; ----------------------------------------------------------------------------
